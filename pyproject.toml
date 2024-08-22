@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "ai-platform-api"
+version = "0.1.0"
+description = ""
+authors = ["Sergio Soto Núñez <sergio.soto@sngular.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["standard"], version = "^0.112.1"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
