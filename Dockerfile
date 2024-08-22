@@ -10,4 +10,4 @@ WORKDIR /code
 COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./ai_platform /code/ai_platform
-CMD ["fastapi", "run", "ai_platform/api.py", "--port", "8000"]
+CMD ["fastapi", "run", "ai_platform/api/main.py", "--port", "8000"]
