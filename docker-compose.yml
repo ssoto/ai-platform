@@ -2,7 +2,7 @@ version: "3.8"
 services:
   ai-platform-fastapi:
     env_file:
-      - .env.docker
+      - .env.local
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,3 +10,13 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+  mongodb-service:
+    image: mongo:latest
+    env_file:
+      - .env.local
+    ports:
+     - "27017:27017"
+    environment:
+     MONGO_INITDB_ROOT_USERNAME: admin
+     MONGO_INITDB_ROOT_PASSWORD: admin
+

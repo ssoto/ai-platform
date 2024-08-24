@@ -2,6 +2,9 @@ from diffusers import DiffusionPipeline
 from pathlib import Path
 import torch
 
+from ai_platform.domain.images.models import ImageTask
+from ai_platform.domain.images.use_cases import update_image_task
+
 HERE = Path(__file__).resolve().parent
 PROJECT_PATH = HERE.parent.parent
 IMAGES_PATH = PROJECT_PATH / "images"
@@ -23,10 +26,22 @@ def startup_pipeline():
     _ = _pipe(prompt, num_inference_steps=1)
 
 
-def generate_image(prompt, image_name):
+def generate_image(image: ImageTask):
     # Results match those from the CPU device after the warmup pass.
     global _pipe
-    result = _pipe(prompt)
-    image = result.images[0]
-    file_path = IMAGES_PATH / f"{image_name}.png"
-    image.save(file_path)
+    try:
+        steps = 30
+        result = _pipe(
+            image.prompt,
+            num_inference_steps=steps
+        )
+        file_path = IMAGES_PATH / f"{image.id}.png"
+        image_file = result.images[0]
+        image_file.save(file_path)
+        image.set_completed()
+    except Exception as e:
+        image.set_failed(reason=repr(e))
+    finally:
+        update_image_task(image)
+
+

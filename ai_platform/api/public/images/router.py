@@ -1,16 +1,11 @@
 import logging
-import random
-from uuid import uuid4
-from fastapi import APIRouter, BackgroundTasks
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request, status, BackgroundTasks
+from fastapi.encoders import jsonable_encoder
+
 from ai_platform.domain.images.models import ImageTask
 from ai_platform.sandbox.images_creation import generate_image
-
-# def generate_new_image(image_task: ImageTask):
-#     # generate image
-#     random_int = random.randint(5, 10)
-#     logging.info(f"Generating image in {random_int}s for task {image_task.task_id} with prompt {image_task.prompt}...")
-#     time.sleep(random_int)
-#     logging.info(f"Image for task {image_task.task_id} generated")
+from ai_platform.domain.images.use_cases import create_image_task, find_image_task_by_id
 
 
 router = APIRouter(
@@ -21,25 +16,28 @@ router = APIRouter(
 
 
 @router.get("/")
-async def retrieve(id_task: str):
-    return ImageTask(
-        # XXX: look for the prompt dude
-        prompt="prompt",
-        task_id=id_task,
-        status=random.choice(["processing", "completed", "failed"])
-    )
+async def retrieve(request: Request, id_task: str):
+
+    result = await find_image_task_by_id(id_task, request.app.mongodb["image_tasks"])
+    if not result:
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": "Task not found"})
+    return JSONResponse(status_code=status.HTTP_200_OK, content=result.dict())
 
 
 @router.post("/")
 async def generate(
+        request: Request,
         prompt: str,
         background_tasks: BackgroundTasks
-) -> ImageTask:
+):
+    prompt = jsonable_encoder(prompt)
+
     image_task = ImageTask(
         prompt=prompt,
-        task_id=uuid4().__str__(),
         status="processing"
     )
-    background_tasks.add_task(generate_image, image_task.prompt, image_task.task_id)
-    logging.info(f"Task {image_task.task_id} added to the queue")
-    return image_task
+    await create_image_task(image_task, request.app.mongodb["image_tasks"])
+
+    background_tasks.add_task(generate_image, image_task)
+    logging.info(f"Task {image_task.id} added to the queue")
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=image_task.dict())
