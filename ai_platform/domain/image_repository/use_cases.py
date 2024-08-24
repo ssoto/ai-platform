@@ -1,20 +1,8 @@
 import logging
-
 from pymongo import MongoClient
 
-from ai_platform.domain.images.models import ImageTask
+from ai_platform.domain.image_tasks.models import ImageTask
 from ai_platform.config import settings
-
-
-async def create_image_task(image_task: ImageTask, db_collection):
-    return await db_collection.insert_one(image_task.dict(by_alias=True))
-
-
-async def find_image_task_by_id(id_task: str, db_collection):
-    result = await db_collection.find_one({"_id": id_task})
-    if result:
-        return ImageTask(**result)
-    return None
 
 
 def update_image_task(image_task: ImageTask):
@@ -29,3 +17,9 @@ def update_image_task(image_task: ImageTask):
     except Exception as e:
         logging.error(f"Error updating image task: {e}")
         client.close()
+
+
+def get_image_url(image_id: str):
+    # FIXME: this is a temporary fix
+    host = f"{settings.HOST}:{settings.PORT}"
+    return f"http://{host}{settings.API_ROOT_PATH}/images/{image_id}"

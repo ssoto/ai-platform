@@ -16,6 +16,7 @@ class CommonSettings(BaseSettings):
 class ServerSettings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
+    API_ROOT_PATH: str = "/freepik/ai-platform/v1"
 
 
 class DatabaseSettings(BaseSettings):

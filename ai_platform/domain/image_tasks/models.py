@@ -1,10 +1,19 @@
 from datetime import datetime
-from uuid import uuid4
+from pathlib import Path
 from typing import Optional
+from uuid import uuid4
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 
 
 NOW_FACTORY = datetime.now
+COMPLETED = "completed"
+PROCESSING = "processing"
+FAILED = "failed"
+
+HERE = Path(__file__).resolve().parent
+PROJECT_PATH = HERE.parent.parent.parent
+IMAGES_PATH = PROJECT_PATH / "images"
+print(IMAGES_PATH)
 
 
 class CreatedUpdatedAt:
@@ -34,10 +43,6 @@ class CreatedUpdatedAt:
 
 class ImageTask(BaseModel):
 
-    COMPLETED = "completed"
-    PROCESSING = "processing"
-    FAILED = "failed"
-
     prompt: str = Field(
         ...,
         title="Prompt to generate the image",
@@ -60,6 +65,16 @@ class ImageTask(BaseModel):
         title="Reason of failure",
         description="Reason of failure"
     )
+    generation_steps: int = Field(
+        50,
+        title="Number of steps to generate the image",
+        description="Number of steps to generate the image"
+    )
+    url: str = Field(
+        None,
+        title="URL to download the image",
+        description="URL to download the image"
+    )
 
     class Config:
         populate_by_name = True
@@ -68,11 +83,15 @@ class ImageTask(BaseModel):
         }
 
     def set_completed(self):
-        self.status = self.COMPLETED
+        self.status = COMPLETED
 
     def set_processing(self):
-        self.status = self.PROCESSING
+        self.status = PROCESSING
 
     def set_failed(self, reason: str):
-        self.status = self.FAILED
+        self.status = FAILED
         self.reason = reason
+
+    @property
+    def image_path(self) -> str:
+        return (IMAGES_PATH / f"{self.id}.png").__str__()
