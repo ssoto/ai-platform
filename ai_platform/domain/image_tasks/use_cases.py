@@ -10,8 +10,15 @@ async def create_image_task(image_task: ImageTask, db_collection):
     return await db_collection.insert_one(image_task.dict(by_alias=True))
 
 
-async def find_image_task_by_id(id_task: str, db_collection):
+async def afind_image_task_by_id(id_task: str, db_collection):
     result = await db_collection.find_one({"_id": id_task})
+    if result:
+        return ImageTask(**result)
+    return None
+
+
+def find_image_task_by_id(id_task: str, db_collection):
+    result = db_collection.find_one({"_id": id_task})
     if result:
         return ImageTask(**result)
     return None
