@@ -1,11 +1,20 @@
 import os
+import logging
 from pydantic_settings import BaseSettings
 from dotenv import find_dotenv, load_dotenv
 
+env = os.environ.get("ENV")
+if not env:
+    raise Exception("ENV environment variable is not set")
 
-env = os.environ.get('ENV', "local")
 env_file = f".env.{env}"
-load_dotenv(find_dotenv(env_file))
+logging.info(f"Loading environment variables from {env_file}")
+
+dotenv_file = find_dotenv(env_file)
+if not dotenv_file:
+    raise Exception(f"Environment file {env_file} not found")
+
+load_dotenv(dotenv_file)
 
 
 class CommonSettings(BaseSettings):

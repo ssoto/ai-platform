@@ -15,7 +15,7 @@ logging.basicConfig(
 def initialize_app(app: FastAPI):
     logging.info("Initializing app...")
     # do some initialization here
-    startup_pipeline()
+    # startup_pipeline()
     app.mongodb_client = AsyncIOMotorClient(settings.DB_URL)
     app.mongodb = app.mongodb_client[settings.DB_NAME]
     logging.info("App initialized")
@@ -26,7 +26,7 @@ def initialize_app(app: FastAPI):
 app = FastAPI(
     title="AI Platform",
     root_path=settings.API_ROOT_PATH,
-    lifespan=initialize_app,
+    lifespan=initialize_app
 )
 
 

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, model_validator, ConfigDict
 
 
 NOW_FACTORY = datetime.now
+NOT_STARTED = "not_started"
 COMPLETED = "completed"
 PROCESSING = "processing"
 FAILED = "failed"
@@ -13,7 +14,6 @@ FAILED = "failed"
 HERE = Path(__file__).resolve().parent
 PROJECT_PATH = HERE.parent.parent.parent
 IMAGES_PATH = PROJECT_PATH / "images"
-print(IMAGES_PATH)
 
 
 class CreatedUpdatedAt:
@@ -56,7 +56,7 @@ class ImageTask(BaseModel):
         alias="_id"
     )
     status: str = Field(
-        ...,
+        default=NOT_STARTED,
         title="Task status",
         description="Task status"
     )

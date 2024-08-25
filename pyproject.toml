@@ -1,9 +1,11 @@
 [tool.poetry]
-name = "ai-platform-api"
+name = "ai_platform"
 version = "0.1.0"
-description = ""
-authors = ["Sergio Soto Núñez <sergio.soto@sngular.com>"]
+description = "An API "
+authors = ["Sergio Soto Núñez <sergio.soto.nunez@gmail.com>"]
 readme = "README.md"
+package-mode = true
+packages = [{include = "ai_platform"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -22,3 +24,7 @@ accelerate = "^0.33.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+ai_platform_api = "ai_platform.api.main:app"
+images_creation = "ai_platform.sandbox.images_creation:main"
