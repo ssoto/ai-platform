@@ -18,7 +18,10 @@ services:
       mongodb-service:
         condition: service_started
   workers:
-    scale: 3
+    cpu_count: 8
+    mem_limit: 8g
+    mem_reservation: 8g
+    scale: 1
     env_file:
       - .env.docker
     environment:
@@ -36,6 +39,13 @@ services:
         condition: service_started
       mongodb-service:
         condition: service_started
+    command:
+      celery -A ai_platform.task_queue.main worker --queues default --pool solo --concurrency 1 --loglevel DEBUG --without-gossip
+    develop:
+      watch:
+        - action: sync
+          path: ./ai_platform
+          target: /app/ai_platform
   mongodb-service:
     image: mongo:latest
     restart: always
