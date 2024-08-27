@@ -2,7 +2,7 @@ FROM python:3.11 as requirements-stage
 WORKDIR /tmp
 RUN pip install poetry
 COPY ./pyproject.toml ./poetry.lock* /tmp/
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes --with development
 
 
 FROM python:3.11 as build-stage
@@ -20,10 +20,12 @@ RUN poetry install --no-interaction --no-ansi
 COPY ./ai_platform /code/ai_platform
 COPY .env.* /code/
 
-COPY ./worker_initialize.sh /code/worker_initialize.sh
-COPY ./worker_entrypoint.sh /code/worker_entrypoint.sh
+COPY ./scripts/worker_initialize.sh /code/worker_initialize.sh
+COPY ./scripts/worker_entrypoint.sh /code/worker_entrypoint.sh
+
 RUN chmod +x /code/worker_entrypoint.sh
 RUN chmod +x /code/worker_initialize.sh
+
 # Execute worker initialization script
 RUN ./worker_initialize.sh
 

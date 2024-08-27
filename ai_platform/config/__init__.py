@@ -33,7 +33,11 @@ class DatabaseSettings(BaseSettings):
     DB_NAME: str
 
 
-class Settings(CommonSettings, ServerSettings, DatabaseSettings):
+class RedisSettings(BaseSettings):
+    REDIS_URL: str
+
+
+class Settings(CommonSettings, ServerSettings, DatabaseSettings, RedisSettings):
     pass
 
 

@@ -1,8 +1,9 @@
-version: "3.8"
 services:
-  ai-platform-api:
+  api:
     env_file:
       - .env.docker
+    environment:
+      - ENV=docker
     build:
       context: .
       dockerfile: Dockerfile.api
@@ -11,7 +12,16 @@ services:
     volumes:
       - .:/app
       - ./images:/code/images
-  image-generator-service:
+    depends_on:
+      redis-service:
+        condition: service_started
+      mongodb-service:
+        condition: service_started
+  workers:
+    cpu_count: 8
+    mem_limit: 8g
+    mem_reservation: 8g
+    scale: 1
     env_file:
       - .env.docker
     environment:
@@ -24,13 +34,36 @@ services:
     volumes:
       - .:/app
       - ./images:/code/images
+    depends_on:
+      redis-service:
+        condition: service_started
+      mongodb-service:
+        condition: service_started
+    command:
+      celery -A ai_platform.task_queue.main worker --queues default --pool solo --concurrency 1 --loglevel DEBUG --without-gossip
+    develop:
+      watch:
+        - action: sync
+          path: ./ai_platform
+          target: /app/ai_platform
   mongodb-service:
     image: mongo:latest
+    restart: always
     env_file:
-      - .env.local
+      - .env.docker
     ports:
      - "27017:27017"
     environment:
      MONGO_INITDB_ROOT_USERNAME: admin
      MONGO_INITDB_ROOT_PASSWORD: admin
-
+  redis-service:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+  flower-service:
+    image: mher/flower:0.9.7
+    command: [ 'flower', '--broker=redis://redis-service:6379/0', '--port=5555' ]
+    ports:
+      - 5557:5555
+    depends_on:
+      - redis-service
