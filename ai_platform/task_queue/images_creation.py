@@ -2,6 +2,8 @@ import logging
 import platform
 
 from diffusers import DiffusionPipeline
+from diffusers.models import AutoencoderKL
+from diffusers import StableDiffusionPipeline
 import torch
 
 from ai_platform.domain.image_tasks.models import ImageTask
@@ -13,12 +15,23 @@ APPLE_SILICON_DEVICE = 'mps'
 
 
 def startup_pipeline(only_download=False):
+    logger.info(f"Starting pipeline")
     # https://huggingface.co/docs/diffusers/tutorials/basic_training
-    pipe = DiffusionPipeline.from_pretrained(
-        "runwayml/stable-diffusion-v1-5",
-        torch_dtype=torch.float16,
-        variant="fp16",
+    # pipe = DiffusionPipeline.from_pretrained(
+    #     "runwayml/stable-diffusion-v1-5",
+    #     torch_dtype=torch.float16,
+    #     variant="fp16",
+    # )
+    logger.info("Loading VAE model")
+    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse")
+
+    model = "CompVis/stable-diffusion-v1-4"
+    logger.info(f"Loading model: {model}")
+    pipe = StableDiffusionPipeline.from_pretrained(
+        model,
+        vae=vae
     )
+
     if only_download:
         return
 
@@ -40,11 +53,16 @@ def startup_pipeline(only_download=False):
 
 
 def create_image(pipe: DiffusionPipeline, image: ImageTask):
+    kwargs = {}
+    if image.seed is not None:
+        generator = torch.Generator(device="cpu").manual_seed(image.seed)
+        kwargs["generator"] = generator
+
+    kwargs["prompt"] = image.prompt
+    kwargs["num_inference_steps"] = image.generation_steps
+
     # Results match those from the CPU device after the warmup pass.
-    result = pipe(
-        image.prompt,
-        num_inference_steps=image.generation_steps
-    )
+    result = pipe(**kwargs)
     image_file = result.images[0]
     logger.info(f"Image generated: {image_file}")
     return image_file
