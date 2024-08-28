@@ -16,16 +16,9 @@ APPLE_SILICON_DEVICE = 'mps'
 
 def startup_pipeline(only_download=False):
     logger.info(f"Starting pipeline")
-    # https://huggingface.co/docs/diffusers/tutorials/basic_training
-    # pipe = DiffusionPipeline.from_pretrained(
-    #     "runwayml/stable-diffusion-v1-5",
-    #     torch_dtype=torch.float16,
-    #     variant="fp16",
-    # )
     logger.info("Loading VAE model")
     vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse")
-
-    model = "CompVis/stable-diffusion-v1-4"
+    model = "runwayml/stable-diffusion-v1-5"
     logger.info(f"Loading model: {model}")
     pipe = StableDiffusionPipeline.from_pretrained(
         model,
