@@ -32,7 +32,7 @@ An example of task document is:
   "prompt": "una gallina sobre una mesa",
   "status": "completed",
   "generation_steps": 50,
-  "url": "http://0.0.0.0:8000/freepik/ai-platform/v1/images/887c90ed-192d-4de8-a381-d643a989639c"
+  "url": "http://0.0.0.0:8000/ai-platform/v1/images/887c90ed-192d-4de8-a381-d643a989639c"
 }
 ```
 

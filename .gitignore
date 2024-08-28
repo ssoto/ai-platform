@@ -157,4 +157,8 @@ cython_debug/
 # PyCharm
 .idea/
 
+# images folder
 images/*
+
+# Mac OS files to ignore
+.DS_Store
