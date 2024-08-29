@@ -61,7 +61,7 @@ class ImageTask(BaseModel):
         description="Task status"
     )
     reason: Optional[str] = Field(
-        default=None,
+        None,
         title="Reason of failure",
         description="Reason of failure"
     )
@@ -69,6 +69,11 @@ class ImageTask(BaseModel):
         50,
         title="Number of steps to generate the image",
         description="Number of steps to generate the image"
+    )
+    seed: Optional[int] = Field(
+        None,
+        title="Seed to generate the image",
+        description="Seed to generate the image"
     )
     url: str = Field(
         None,

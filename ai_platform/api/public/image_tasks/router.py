@@ -1,7 +1,8 @@
 import logging
 from fastapi.responses import JSONResponse
+from pydantic import Field, BaseModel, field_validator
 from fastapi import APIRouter, Request, status, BackgroundTasks
-from fastapi.encoders import jsonable_encoder
+from typing import Optional
 
 from ai_platform.domain.image_tasks.models import ImageTask
 from ai_platform.domain.image_tasks.use_cases import create_image_task, afind_image_task_by_id
@@ -14,6 +15,28 @@ router = APIRouter(
     tags=["Image Tasks"],
     responses={404: {"description": "Not found"}},
 )
+
+
+class GenerationRequest(BaseModel):
+    prompt: str = Field(
+        ...,
+        title="Prompt to generate the image"
+    )
+    generation_steps: Optional[int] = Field(
+        50,
+        title="Number of steps to generate the image. Values between 1 and 999"
+    )
+    seed: Optional[int] = Field(
+        None,
+        title="Seed to generate the image"
+    )
+
+    @field_validator("generation_steps") # noqa
+    @classmethod
+    def validate_generation_steps(cls, v):
+        if v < 1 or v > 999:
+            raise ValueError("Generation steps must be between 1 and 999")
+        return v
 
 
 @router.get("/")
@@ -34,13 +57,13 @@ async def retrieve(request: Request, id_task: str):
 @router.post("/")
 async def generate(
         request: Request,
-        prompt: str,
+        body: GenerationRequest,
         background_tasks: BackgroundTasks
 ):
-    prompt = jsonable_encoder(prompt)
-
     image_task = ImageTask(
-        prompt=prompt,
+        prompt=body.prompt,
+        generation_steps=body.generation_steps,
+        seed=body.seed
     )
     # FIXME: this image service is a local endpoint, it should be a service
     image_task.url = get_image_url(image_task.id)
